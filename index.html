@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <script type="application/shiny-singletons"></script>
+  <script type="application/html-dependencies">json2[2014.02.04];jquery[1.12.4];shiny[1.0.5];bootstrap[3.3.7]</script>
+<script src="shared/json2-min.js"></script>
+<script src="shared/jquery.min.js"></script>
+<link href="shared/shiny.css" rel="stylesheet" />
+<script src="shared/shiny.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="shared/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<script src="shared/bootstrap/js/bootstrap.min.js"></script>
+<script src="shared/bootstrap/shim/html5shiv.min.js"></script>
+<script src="shared/bootstrap/shim/respond.min.js"></script>  <title>
+    <h4 align="center">Calculator for false positive risk (FPR)</h4>
+  </title>
+
+</head>
+
+<body>
+  <div class="container-fluid">
+    <h2>
+      <h4 align="center">Calculator for false positive risk (FPR)</h4>
+    </h2>
+    <div class="row">
+      <div class="col-sm-4">
+        <form class="well">
+          <div id="calctype" class="form-group shiny-input-radiogroup shiny-input-container">
+            <label class="control-label" for="calctype">Choose what to calculate:</label>
+            <div class="shiny-options-group">
+              <div class="radio">
+                <label>
+                  <input type="radio" name="calctype" value="calcprior" checked="checked"/>
+                  <span>1. calculate prior (for given FPR and P value)</span>
+                </label>
+              </div>
+              <div class="radio">
+                <label>
+                  <input type="radio" name="calctype" value="calcpval"/>
+                  <span> 2. calculate P value (for given FPR and prior)</span>
+                </label>
+              </div>
+              <div class="radio">
+                <label>
+                  <input type="radio" name="calctype" value="calcFPR"/>
+                  <span>3. calculate FPR (for given P value and prior)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div data-display-if="input.calctype == &#39;calcprior&#39;" data-ns-prefix="">
+            <div class="form-group shiny-input-container">
+              <label for="pval1">
+                <h5>Observed P value</h5>
+              </label>
+              <input id="pval1" type="number" class="form-control" value="0.05" min="0" max="1" step="0.01"/>
+            </div>
+            <div class="form-group shiny-input-container">
+              <label for="FPR1">
+                <h5>False positive risk</h5>
+              </label>
+              <input id="FPR1" type="number" class="form-control" value="0.05" min="0" max="1" step="0.01"/>
+            </div>
+          </div>
+          <div data-display-if="input.calctype == &#39;calcpval&#39;" data-ns-prefix="">
+            <div class="form-group shiny-input-container">
+              <label for="FPR2">
+                <h5>False positive risk</h5>
+              </label>
+              <input id="FPR2" type="number" class="form-control" value="0.05" min="0" max="1" step="0.01"/>
+            </div>
+            <div class="form-group shiny-input-container">
+              <label for="prior2">
+                <h5>prior probability of          real effect</h5>
+              </label>
+              <input id="prior2" type="number" class="form-control" value="0.5" min="0" max="1" step="0.01"/>
+            </div>
+          </div>
+          <div data-display-if="input.calctype == &#39;calcFPR&#39;" data-ns-prefix="">
+            <div class="form-group shiny-input-container">
+              <label for="pval3">
+                <h5>observed P value</h5>
+              </label>
+              <input id="pval3" type="number" class="form-control" value="0.05" min="0" max="1" step="0.01"/>
+            </div>
+            <div class="form-group shiny-input-container">
+              <label for="prior3">
+                <h5>prior probability of real effect</h5>
+              </label>
+              <input id="prior3" type="number" class="form-control" value="0.5" min="0" max="1" step="0.01"/>
+            </div>
+          </div>
+          <div class="shiny-input-panel">
+            <div class="shiny-flow-layout">
+              <div>
+                <div class="form-group shiny-input-container">
+                  <label for="nsamp">
+                    <h5>Number in each sample</h5>
+                  </label>
+                  <input id="nsamp" type="number" class="form-control" value="16" min="2" step="1"/>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="shiny-input-panel">
+            <div class="shiny-flow-layout">
+              <div>
+                <div class="form-group shiny-input-container">
+                  <label for="effsize">
+                    <h5>Effect size (as multiple of SD)</h5>
+                  </label>
+                  <input id="effsize" type="number" class="form-control" value="1" min="0.01" step="0.003"/>
+                </div>
+              </div>
+            </div>
+          </div>
+          <span class="help-block">
+            Please cite this page if you find it useful,          version 1.2 Longstaff,C. and Colquhoun D, https://davidcolquhoun.shinyapps.io/3-calcs-final/ Last accessed
+            2017-09-21
+          </span>
+        </form>
+      </div>
+      <div class="col-sm-8">
+        <div class="tabbable">
+          <ul class="nav nav-tabs" data-tabsetid="3455">
+            <li class="active">
+              <a href="#tab-3455-1" data-toggle="tab" data-value="Calculations">Calculations</a>
+            </li>
+            <li>
+              <a href="#tab-3455-2" data-toggle="tab" data-value="Notes">Notes</a>
+            </li>
+          </ul>
+          <div class="tab-content" data-tabsetid="3455">
+            <div class="tab-pane active" data-value="Calculations" id="tab-3455-1">
+              <span class="help-block">
+                <h4>Results</h4>
+              </span>
+              <h5>
+                <div id="text3" class="shiny-text-output"></div>
+              </h5>
+              <div id="resultsTable" class="shiny-html-output"></div>
+            </div>
+            <div class="tab-pane" data-value="Notes" id="tab-3455-2">
+              <span class="help-block">
+                <h3>False positive risk calculations</h3>
+              </span>
+              <span class="help-block">This web app was written by Colin Longstaff and David Colquhoun with help from Brendan Halpin.</span>
+              <span class="help-block">
+                <h4>Statistical considerations</h4>
+              </span>
+              <span class="help-block">The question which we ask in refs[1 -3] is as follows. If you observe a "significant" P value after doing a single unbiased experiment, what is the probability that your result is a false positive?.</span>
+              <span class="help-block">"False positive risk" (FPR) is defined here as the probability that a result which is "significant" at a specified P value, is a false positive result. It is defined and explained in ref [3] The same thing was called "false discovery rate"in refs [1] and[2], and it was called "false positive rate" in earlier drafts of ref [3]   The notation in this field is a mess and it's important to check the definitions in each paper</span>
+              <span class="help-block">
+                There are two different ways to calculate FPR. These are explained in detail in section 10 of ref [1], and, more carefully, in section 3 of ref [3].  They  can be called the
+                <em>p-equals</em>
+                method, and the
+                <em>p-less-than</em>
+                method. The latter definition is used most frequently (eg by Ioannidis and by Wacholder), but the former method is more appropriate for answering our question. All three options give results that are calculated with both methods. The results with the
+                <em>p-equals</em>
+                method, give higher false positive risk, for any given P value, than the other method, but they are the appropriate way to answer the question.
+              </span>
+              <span class="help-block">
+                <h4>How to run calculations</h4>
+              </span>
+              <span class="help-block">Click on the calculations tab, and choose which calculation to do by selecting one of the three radio buttons (top left)  The input boxes that are appropriate for the calculation will appear. There are three variables, observed P value, FPR and the prior probability that the null hypothesis is false. The calculator will work out any one of these, given numbers for the other two.  All three calculations require also the number of observations in each sample, The default number is 16 which gives a power of 0.78 for P = 0.05 and the default effect size, one standard deviation -see ref [1] and [3] for more details.</span>
+              <span class="help-block">
+                <h4>A real life example</h4>
+              </span>
+              <span class="help-block">
+                A study of transcranial electromagnetic stimulation, published In
+                <em>Science</em>
+                 concluded that it "improved associative memory performance", P = 0.043.  If we assume that the experiment had adequate power (the sample size of 8 suggests that might be optimistic)  then, in order to achieve a false positive risk of 5% when we observe P = 0.043, we would have to assume a prior probability of 0.85 that the effect on memory was genuine (found from radio button 1). Most people would think it was less than convincing to present an analysis based on the assumption that you were almost certain (probability 0.85) to be right before you did the experiment.
+                <br/>
+                Another way to express the strength of the evidence provided by P = 0.043 is to note that it makes the existence of a real effect only 3.3 times as likely as the existence of no effect (likelihood ratio).  This would correspond to a minimum false positive risk of 23% if we were willing to assume that non-specific electrical zapping of the brain was as likely as not to improve memory (prior probability of a real effect was 0.5) (found via radio button 3).
+                <br/>
+                The radio button 2 option shows that in the most optimistic case (prior = 0.5), you need to have P = 0.008 to achieve an FPR of 5 percent. [example from ref 3]
+              </span>
+              <span class="help-block">
+                <h4>Notes</h4>
+              </span>
+              <span class="help-block">From ver 1.1 onwards, the effect size (expressed as a multiple of the standard deviation) can be entered. The same results are found if the power is kept constant. For example effect size = 1 and n = 16 gives power = 0.78. For an effect size of 0.5 SD, n = 61 gives similar power and similar FPR etc.  And for an effect size of 0.2 SD, a power of 0.78 requires n = 375, and again this gives similar FPR etc. See ref [4].
+
+         So choose n so that the calculated power matches that of your experiment.</span>
+              <span class="help-block">There is a popular account of the logic involved in ref [6]. And ref [3] has, on pp 18-19, a response to the recent 72 author paper, Benjamin et al  [7], on related topics</span>
+              <span class="help-block">
+                <h4>References</h4>
+              </span>
+              <span class="help-block">
+                1.	Colquhoun D.(2014) An investigation of the false discovery rate and the misinterpretation of p-values. Royal Society Open Science. 1(3):140216. doi: 10.1098/rsos.140216.
+                <a href="http://rsos.royalsocietypublishing.org/content/1/3/140216">Click for full text</a>
+                <br/>
+                2. 	Colquhoun D. False discovery rates: the movie
+                <a href="https://www.youtube.com/watch?v=tRZMD1cYX_c">Click for YouTube</a>
+                <br/>
+                3. 	Colquhoun D. (2017). The reproducibility of research and misinterpretation of P values.bioRxiv, May 31, 2017, doi: http://dx.doi.org/10.1101/144337
+                <a href="http://www.biorxiv.org/content/early/2017/08/07/144337">Click for full text</a>
+                <br/>
+                4,   Colquhoun. D, (2015) Response to comment by Loiselle &amp; Ramchandra (2015), Royal Society Open Science: DOI: 10.1098/rsos.150319
+                <a href="http://rsos.royalsocietypublishing.org/content/2/8/150319">Click for full text</a>
+                <br/>
+                6. 	Colquhoun D. (2016). The problem with p-values. Aeon Magazine
+                <a href="https://aeon.co/essays/it-s-time-for-science-to-abandon-the-term-statistically-significant">Click for full text</a>
+                <br/>
+                7. 	Benjamin, D. et al. (2017)  Redefine Statistical Significance. PsyArXiv Preprints, July 22, 2017.
+                <a href="https://dx.doi.org/10.17605/OSF.IO/MKY9J">Click for full text</a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
