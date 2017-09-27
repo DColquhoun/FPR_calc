@@ -45,7 +45,7 @@ inputPanel(
   numericInput("effsize",label = h5("Effect size (as multiple of SD)"),step=0.003,min=0.01, value = 1.0)
 ),
     
-    helpText("Please cite this page if you find it useful,          version 1.2 Longstaff,C. and Colquhoun D, https://davidcolquhoun.shinyapps.io/3-calcs-final/ Last accessed", Sys.Date())
+    helpText("Please cite this page if you find it useful,          version 1.3 Longstaff,C. and Colquhoun D, https://davidcolquhoun.shinyapps.io/3-calcs-final/ Last accessed", Sys.Date())
   ),
   
   
@@ -89,10 +89,11 @@ tags$br(),
 
 helpText(h4("Notes")),
 
-helpText("From ver 1.1 onwards, the effect size (expressed as a multiple of the standard deviation) can be entered. The same results are found if the power is kept constant. For example effect size = 1 and n = 16 gives power = 0.78. For an effect size of 0.5 SD, n = 61 gives similar power and similar FPR etc.  And for an effect size of 0.2 SD, a power of 0.78 requires n = 375, and again this gives similar FPR etc. See ref [4]. \n 
+helpText("From ver 1.1 onwards, the effect size (expressed as a multiple of the standard deviation of the observations) can be entered. The same results are found if the power is kept constant. For example effect size = 1 and n = 16 gives power = 0.78. For an effect size of 0.5 SD, n = 61 gives similar power and similar FPR etc.  And for an effect size of 0.2 SD, a power of 0.78 requires n = 375, and again this gives similar FPR etc. See ref [4]. \n 
          So choose n so that the calculated power matches that of your experiment."
 ),
-
+helpText("From ver 1.3 onwards, the values of power that are printed out are calculated for P = 0.05 and the specified effect size (expressed as a multiple of the standard deviation of the observations).  In earlier versions they were caluclated using the  observed P value)."
+),
 helpText("There is a popular account of the logic involved in ref [6]. And ref [3] has, on pp 18-19, a response to the recent 72 author paper, Benjamin et al  [7], on related topics"),
 helpText(h4("References")),
 
@@ -178,24 +179,28 @@ server <-  function(input, output){
       
       myp=power.t.test(n=nsamp,sd=sigma,delta=delta1,sig.level=pval,type="two.sample",alternative="two.sided",power=NULL)
       power = myp$power
-      
       prior0=pval*(1-FPR)/(pval*(1-FPR) + power*FPR)
       prior1=round(prior,4)    #rounded to 4 sig figs
       prior10=round(prior0,4)
       power1=round(power,4)
-      
+# For print, calculate power for p=0.05 and specified eff size 
+      myp2=power.t.test(n=nsamp,sd=sigma,delta=delta1,sig.level=0.05,type="two.sample",alternative="two.sided",power=NULL)
+      power2 = myp2$power
+      power21=round(power2,4)
+#      
       ResMat<-matrix(c("INPUT", "", "",
                        "FPR", FPR, "",
                        "Observed P value", pval, "",
                        "Observations per sample", nsamp, "",
                        "Sample1 mean,  sd", mymu1, mysd1,
                        "Sample2 mean,  sd", mymu2, mysd2,
+                       " Effect size (mult of SD)",input$effsize,"",
                         "","","",
                        "OUTPUT", "p-equals case", 
                          "P-less-than case",
                        "prior prob of H1", prior1,prior10,
-                       "power", power1, power1),
-                        byrow=TRUE, nrow = 10)
+                       "power (for p=0.05, and effect size)", power21, power21),
+                        byrow=TRUE, nrow = 11)
       
       
     }    #end of if (input$calctype == "calcprior")
@@ -345,6 +350,11 @@ server <-  function(input, output){
       LR20=round(LR10,4)
       FPR1=round(FPR,4)
       FPR10 = round(FPR0,4)
+      # Print power for p = 0.05 and specified effect size
+      mypp=power.t.test(n=nsamp,sd=sigma,delta=delta1,sig.level=0.05,type="two.sample",alternative="two.sided",power=NULL)
+      powerp = mypp$power
+      powerp1 = round(powerp,4)
+      #
       
       ResMat<-matrix(c("INPUT", "", "",
                        "Observed p value", pval, "",
@@ -352,13 +362,14 @@ server <-  function(input, output){
                        "observations per sample", nsamp, "",
                        "Sample1 mean, sd", mymu1, mysd1,
                        "Sample2 mean, sd", mymu2, mysd2,
+                       " Effect size (mult of SD)",input$effsize,"",
                        " "," "," ",
                        "OUTPUT", "p-equals case",
                        "p-less-than case",
                        "FPR", FPR1, FPR10,
-                       "power", power1, power1,
-                       "Likelihood ratio", LR2, LR20),
-                     byrow=TRUE, nrow = 11)
+                       "Likelihood ratio", LR2, LR20,
+                     "power (for p = 0.05 and effect size)", powerp1, powerp1),
+                     byrow=TRUE, nrow = 12)
       
       
     }    # end of  if (input$calctype == "calcFPR")
